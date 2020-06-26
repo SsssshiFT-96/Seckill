@@ -23,14 +23,15 @@ public class GlobalExceptionHandler {
         if(e instanceof GlobalException){
             GlobalException gex = (GlobalException)e;
             return Result.error(gex.getCm());
-        } else if(e instanceof BindException){
+        }else if(e instanceof BindException){
             BindException ex = (BindException)e;
             List<ObjectError> errors = ex.getAllErrors();
             ObjectError error = errors.get(0);
             String msg = error.getDefaultMessage();
 
             return Result.error(CodeMsg.BIND_ERROR.fillArgs(msg));
-        }else{
+        }
+        else{
             return  Result.error(CodeMsg.SERVER_ERROR);
         }
 
