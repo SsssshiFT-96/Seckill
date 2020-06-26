@@ -10,10 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -38,5 +35,35 @@ public class GoodsController {
         return "goods_list";
     }
 
+    @RequestMapping("/to_detail/{goodsId}")
+    public String detail(Model model, MiaoShaUser miaoShaUser,
+                         @PathVariable("goodsId")Long goodsId){
+        //题外话：一般使用snowflake给商品设置id
+        model.addAttribute("user", miaoShaUser);
 
+        //获得秒杀商品详情
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+        model.addAttribute("goods", goods);
+
+        //秒杀商品状态
+        int miaoshaStatus = 0;
+        long remainSeconds = 0;
+        //获得秒杀商品的开始结束时间
+        long startAt = goods.getStartDate().getTime();
+        long endAt = goods.getEndDate().getTime();
+        long now = System.currentTimeMillis();
+        if(now < startAt){//秒杀还未开始，倒计时
+            miaoshaStatus = 0;
+            remainSeconds = startAt - now / 1000;
+        }else if(now > endAt){//秒杀结束
+            miaoshaStatus = 2;
+            remainSeconds = -1;
+        }else{//秒杀进行中
+            miaoshaStatus = 1;
+            remainSeconds = 0;
+        }
+        model.addAttribute("miaoshaStatus", miaoshaStatus);
+        model.addAttribute("remainSeconds", remainSeconds);
+        return "goods_detail";
+    }
 }
