@@ -6,6 +6,6 @@ import lombok.Data;
 public class MiaoShaOrder {
     private Long id;
     private Long userId;
-    private Long  orderId;
+    private Long orderId;
     private Long goodsId;
 }
