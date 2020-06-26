@@ -24,22 +24,7 @@ public class GoodsController {
     MiaoShaUserService miaoShaUserService;
 
     @RequestMapping("/to_list")
-    public String toList(HttpServletResponse response, Model model,
-                         //获取客户端上的token
-                         @CookieValue(value = MiaoShaUserService.COOKIE_NAME_TOKEN,
-                         required = false) String cookieToken,
-                         //很多手机端不会把token放在cookie中，而是直接放到参数中传
-                         @RequestParam(value=MiaoShaUserService.COOKIE_NAME_TOKEN,
-                         required = false) String paramToken){
-        //如果取到的token为空，则返回登录页面登录
-        if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)){
-            return "login";
-        }
-        //优先取paramToken
-        String token = StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
-
-        MiaoShaUser miaoShaUser = miaoShaUserService.getByToken(response, token);
-
+    public String toList(Model model, MiaoShaUser miaoShaUser){
         model.addAttribute("miaoShaUser", miaoShaUser);
         return "goods_list";
     }
