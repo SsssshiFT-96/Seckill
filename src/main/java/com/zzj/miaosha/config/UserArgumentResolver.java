@@ -44,7 +44,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         String paramToken = request.getParameter(MiaoShaUserService.COOKIE_NAME_TOKEN);
         //优先取paramToken
         if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)){
-            return "login";
+            return null;
         }
 
         String token = StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
@@ -56,6 +56,9 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
     private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
         Cookie[] cookies = request.getCookies();
+        if(cookies == null || cookies.length <= 0){
+            return null;
+        }
         for(Cookie cookie : cookies){
             if(cookie.getName().equals(cookieNameToken)){
                 return cookie.getValue();
