@@ -42,7 +42,8 @@ public class RedisService {
     /**
      *获取对象
      */
-    public <T> T get(KeyPrefix prefix, String key, Class<T> clazz){
+    public <T> T
+    get(KeyPrefix prefix, String key, Class<T> clazz){
         Jedis jedis = null;
         try{
             jedis = jedisPool.getResource();
@@ -51,6 +52,23 @@ public class RedisService {
             String str = jedis.get(realKey);
             T t = stringToBean(str, clazz);
             return  t;
+        }finally{
+            returnToPool(jedis);
+        }
+    }
+
+
+    /**
+     *删除对象
+     */
+    public boolean delete(KeyPrefix prefix, String key){
+        Jedis jedis = null;
+        try{
+            jedis = jedisPool.getResource();
+            //生成真正的key
+            String realKey = prefix.getPrefix() + key;
+            Long del = jedis.del(realKey);
+            return del > 0;
         }finally{
             returnToPool(jedis);
         }

@@ -14,10 +14,10 @@ public class CodeMsg {
     //登录模块
     public static CodeMsg SESSION_ERROR = new CodeMsg(511, "session不存在或已经失效");
     public static CodeMsg PASSWORD_EMPTY = new CodeMsg(512, "密码为空");
-    public static CodeMsg MOBILE_EMPTY = new CodeMsg(512, "手机号为空");
+    public static CodeMsg MOBILE_EMPTY = new CodeMsg(516, "手机号为空");
     public static CodeMsg MOBILE_ERROR = new CodeMsg(513, "手机号格式错误");
     public static CodeMsg MOBILE_NOT_EXIST = new CodeMsg(514, "手机号不存在");
-    public static CodeMsg PASSWORD_ERROR = new CodeMsg(514, "密码错误");
+    public static CodeMsg PASSWORD_ERROR = new CodeMsg(515, "密码错误");
 
     //秒杀模块
     public static CodeMsg MIAO_SHA_OVER = new CodeMsg(521, "商品已经秒杀完毕");

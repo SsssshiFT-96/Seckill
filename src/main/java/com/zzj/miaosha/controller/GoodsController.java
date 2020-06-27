@@ -1,6 +1,8 @@
 package com.zzj.miaosha.controller;
 
 import com.zzj.miaosha.domain.MiaoShaUser;
+import com.zzj.miaosha.redis.GoodsKey;
+import com.zzj.miaosha.redis.RedisService;
 import com.zzj.miaosha.result.Result;
 import com.zzj.miaosha.service.GoodsService;
 import com.zzj.miaosha.service.MiaoShaUserService;
@@ -11,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.IWebContext;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
@@ -26,21 +32,60 @@ public class GoodsController {
     @Autowired
     GoodsService goodsService;
 
-    @RequestMapping("/to_list")
-    public String list(Model model, MiaoShaUser miaoShaUser){
+    @Autowired
+    RedisService redisService;
+
+    //使用框架提供的ThymeleafViewResolver来进行渲染
+    @Autowired
+    ThymeleafViewResolver thymeleafViewResolver;
+
+    @RequestMapping(value = "/to_list", produces = "text/html")
+    @ResponseBody//直接返回HTML源代码
+    public String list(Model model, MiaoShaUser miaoShaUser,
+                       HttpServletResponse response,
+                       HttpServletRequest request){
         model.addAttribute("user", miaoShaUser);
+        //直接返回html源代码
+        //1.先从缓存中看能否取到
+        String html = redisService.get(GoodsKey.getGoodsList, "", String.class);
+        if(!StringUtils.isEmpty(html)){//如果不是空就返回
+            return html;
+        }
+
         //查询商品列表
         List<GoodsVo> goodsList = goodsService.listGoodsVo();
 
         model.addAttribute("goodsList", goodsList);
-        return "goods_list";
+
+        //2.如果缓存中没有，就手工渲染。方法参数为：模板名称，模板需要的参数如request等
+        //因为项目使用的是thymeleaf.spring5的版本把SpringWebContext大部分的功能移到了IWebContext下面
+        //用来区分边界。剔除了ApplicationContext 过多的依赖，现在thymeleaf渲染不再过多依赖spring容器
+        IWebContext ctx = new WebContext(request, response, request.getServletContext(),
+                                        request.getLocale(), model.asMap());
+        html = thymeleafViewResolver.getTemplateEngine().process("goods_list", ctx);
+        //3.若html非空，则将其存到缓存中
+        if(!StringUtils.isEmpty(html)){
+            redisService.set(GoodsKey.getGoodsList,"", html);
+        }
+
+        return html;
+//        return "goods_list";
     }
 
-    @RequestMapping("/to_detail/{goodsId}")
+    @RequestMapping(value = "/to_detail/{goodsId}", produces = "text/html")
+    @ResponseBody
     public String detail(Model model, MiaoShaUser miaoShaUser,
-                         @PathVariable("goodsId")Long goodsId){
+                         @PathVariable("goodsId")Long goodsId,
+                         HttpServletResponse response,
+                         HttpServletRequest request){
         //题外话：一般使用snowflake给商品设置id
         model.addAttribute("user", miaoShaUser);
+
+        //1.先从缓存中看能否取到
+        String html = redisService.get(GoodsKey.getGoodsDetail, "" + goodsId, String.class);
+        if(!StringUtils.isEmpty(html)){//如果不是空就返回
+            return html;
+        }
 
         //获得秒杀商品详情
         GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
@@ -65,6 +110,15 @@ public class GoodsController {
         }
         model.addAttribute("miaoshaStatus", miaoshaStatus);
         model.addAttribute("remainSeconds", remainSeconds);
-        return "goods_detail";
+//        return "goods_detail";
+        //2.如果缓存中没有，就手工渲染。
+        IWebContext ctx = new WebContext(request, response, request.getServletContext(),
+                request.getLocale(), model.asMap());
+        html = thymeleafViewResolver.getTemplateEngine().process("goods_detail", ctx);
+        //3.若html非空，则将其存到缓存中
+        if(!StringUtils.isEmpty(html)){
+            redisService.set(GoodsKey.getGoodsDetail,"" + goodsId, html);
+        }
+        return html;
     }
 }

@@ -29,10 +29,43 @@ public class MiaoShaUserService {
     RedisService redisService;
 
     public MiaoShaUser getById(Long id){
+        //1.取缓存
+        MiaoShaUser user = redisService.get(MiaoShaUserKey.getById, "" + id, MiaoShaUser.class);
+        if(user != null){//若缓存中有则返回
+            return user;
+        }
+        //2.缓存中没有就手动从数据库中取出
+        user = miaoShaUserDao.getById(id);
+        //3.存入缓存
+        if(user != null){
+            redisService.set(MiaoShaUserKey.getById,"" + id, user);
+        }
 
-        MiaoShaUser miaoShaUser = miaoShaUserDao.getById(id);
-        return miaoShaUser;
+//        MiaoShaUser miaoShaUser = miaoShaUserDao.getById(id);
+        return user;
     }
+
+    public boolean updatePassword(String token, long id, String formPass){
+        //取User
+        MiaoShaUser user = getById(id);
+        if(user == null){
+            throw new GlobalException(CodeMsg.MOBILE_NOT_EXIST);
+        }
+        //更新数据库
+        MiaoShaUser toBeUpdate = new MiaoShaUser();
+        toBeUpdate.setId(id);
+        toBeUpdate.setPassword(MD5Util.formPassDBPass(formPass, user.getSalt()));
+        miaoShaUserDao.update(toBeUpdate);
+        //处理缓存，跟user有关的缓存都需要改掉
+        //删掉旧对象
+        redisService.delete(MiaoShaUserKey.getById, ""+id);
+        //token开头的key不能删除，因为还要登录,所以是更新
+        user.setPassword(toBeUpdate.getPassword());
+        redisService.set(MiaoShaUserKey.token, token, user);
+
+        return true;
+    }
+
 
     public String login(HttpServletResponse response, LoginVo loginVo){
 
