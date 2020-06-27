@@ -1,7 +1,7 @@
 package com.zzj.miaosha.service;
 
-import com.zzj.miaosha.dao.GoodsDao;
 import com.zzj.miaosha.domain.Goods;
+import com.zzj.miaosha.domain.MiaoShaGoods;
 import com.zzj.miaosha.domain.MiaoShaUser;
 import com.zzj.miaosha.domain.OrderInfo;
 import com.zzj.miaosha.vo.GoodsVo;
@@ -23,6 +23,8 @@ public class MiaoshaService {
     public OrderInfo miaosha(MiaoShaUser miaoShaUser, GoodsVo goods) {
         //减库存、下订单、写入秒杀订单，这三种应该同时成功同时失败，所以使用事务
         goodsService.reduceStock(goods);
+
+//        System.out.println("减了一次库存");
 
         return orderService.createOrder(miaoShaUser, goods);
 
