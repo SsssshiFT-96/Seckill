@@ -2,7 +2,8 @@ package com.zzj.miaosha.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-public class MD5Util {
+public class
+MD5Util {
 
     //对明文字符串做MD5
     public static String md5(String src){
