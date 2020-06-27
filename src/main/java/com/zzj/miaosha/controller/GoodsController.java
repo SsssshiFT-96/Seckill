@@ -6,6 +6,7 @@ import com.zzj.miaosha.redis.RedisService;
 import com.zzj.miaosha.result.Result;
 import com.zzj.miaosha.service.GoodsService;
 import com.zzj.miaosha.service.MiaoShaUserService;
+import com.zzj.miaosha.vo.GoodsDetailVo;
 import com.zzj.miaosha.vo.GoodsVo;
 import com.zzj.miaosha.vo.LoginVo;
 import org.apache.commons.lang3.StringUtils;
@@ -72,9 +73,42 @@ public class GoodsController {
 //        return "goods_list";
     }
 
-    @RequestMapping(value = "/to_detail/{goodsId}", produces = "text/html")
+    @RequestMapping(value = "/detail/{goodsId}")
     @ResponseBody
-    public String detail(Model model, MiaoShaUser miaoShaUser,
+    public Result<GoodsDetailVo> detail(Model model, MiaoShaUser miaoShaUser,
+                                        @PathVariable("goodsId")Long goodsId,
+                                        HttpServletResponse response,
+                                        HttpServletRequest request){
+        //获得秒杀商品详情
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+        //秒杀商品状态
+        int miaoshaStatus = 0;
+        long remainSeconds = 0;
+        //获得秒杀商品的开始结束时间
+        long startAt = goods.getStartDate().getTime();
+        long endAt = goods.getEndDate().getTime();
+        long now = System.currentTimeMillis();
+        if(now < startAt){//秒杀还未开始，倒计时
+            miaoshaStatus = 0;
+            remainSeconds = startAt - now;
+        }else if(now > endAt){//秒杀结束
+            miaoshaStatus = 2;
+            remainSeconds = -1;
+        }else{//秒杀进行中
+            miaoshaStatus = 1;
+            remainSeconds = 0;
+        }
+        GoodsDetailVo vo = new GoodsDetailVo();
+        vo.setGoods(goods);
+        vo.setUser(miaoShaUser);
+        vo.setMiaoshaStatus(miaoshaStatus);
+        vo.setRemainSeconds(remainSeconds);
+        return Result.success(vo);
+    }
+
+    @RequestMapping(value = "/to_detail2/{goodsId}", produces = "text/html")
+    @ResponseBody
+    public String detail2(Model model, MiaoShaUser miaoShaUser,
                          @PathVariable("goodsId")Long goodsId,
                          HttpServletResponse response,
                          HttpServletRequest request){
