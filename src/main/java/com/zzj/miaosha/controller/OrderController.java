@@ -30,7 +30,7 @@ public class OrderController {
     public Result<OrderDetailVo> detail(@RequestParam("orderId") long orderId,
                                         MiaoShaUser user){
         if(user == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
         OrderInfo order = orderService.getOrderByOrderId(orderId);
         if(order == null){

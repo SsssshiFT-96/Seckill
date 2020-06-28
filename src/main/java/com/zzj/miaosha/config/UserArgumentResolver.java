@@ -1,5 +1,6 @@
 package com.zzj.miaosha.config;
 
+import com.zzj.miaosha.access.UserContext;
 import com.zzj.miaosha.domain.MiaoShaUser;
 import com.zzj.miaosha.service.MiaoShaUserService;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +36,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
                                   ModelAndViewContainer modelAndViewContainer,
                                   NativeWebRequest nativeWebRequest,
                                   WebDataBinderFactory webDataBinderFactory) throws Exception {
-        //获取request和response
+       /* //获取request和response
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
         HttpServletResponse response = nativeWebRequest.getNativeResponse(HttpServletResponse.class);
         //获取客户端上的token即cookieToken
@@ -51,7 +52,8 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
         MiaoShaUser miaoShaUser = miaoShaUserService.getByToken(response, token);
 
-        return miaoShaUser;
+        return miaoShaUser;*/
+        return UserContext.getUser();
     }
 
     private String getCookieValue(HttpServletRequest request, String cookieNameToken) {

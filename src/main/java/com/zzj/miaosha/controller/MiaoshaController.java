@@ -1,10 +1,12 @@
 package com.zzj.miaosha.controller;
 
+import com.zzj.miaosha.access.AccessLimit;
 import com.zzj.miaosha.domain.MiaoShaOrder;
 import com.zzj.miaosha.domain.MiaoShaUser;
 import com.zzj.miaosha.domain.OrderInfo;
 import com.zzj.miaosha.rabbitmq.MQSender;
 import com.zzj.miaosha.rabbitmq.MiaoshaMessage;
+import com.zzj.miaosha.redis.AccessKey;
 import com.zzj.miaosha.redis.GoodsKey;
 import com.zzj.miaosha.redis.MiaoshaKey;
 import com.zzj.miaosha.redis.RedisService;
@@ -23,6 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.OutputStream;
@@ -79,7 +82,7 @@ public class MiaoshaController implements InitializingBean {
                                      @RequestParam("goodsId") long goodsId){
         model.addAttribute("user", miaoShaUser);
         if(miaoShaUser == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
 
         //1.初始化库存，afterPropertiesSet已做
@@ -118,7 +121,7 @@ public class MiaoshaController implements InitializingBean {
                                    @RequestParam("goodsId") long goodsId){
         model.addAttribute("user", miaoShaUser);
         if(miaoShaUser == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
         long result = miaoshaService.getMiaoshaResult(miaoShaUser.getId(), goodsId);
 
@@ -129,15 +132,29 @@ public class MiaoshaController implements InitializingBean {
     /**
      *隐藏秒杀地址，生成path
      */
+    //定义一个注解来实现限流
+    @AccessLimit(seconds = 5, maxCount = 5, needLogin = true)
     @RequestMapping(value = "/path", method = RequestMethod.GET)
     @ResponseBody
     public Result<String> getMiaoshaPath(Model model, MiaoShaUser miaoShaUser,
                                          @RequestParam("goodsId") long goodsId,
-                                         @RequestParam("verifyCode") int verifyCode){
+                                         @RequestParam("verifyCode") int verifyCode,
+                                         HttpServletRequest request){
         model.addAttribute("user", miaoShaUser);
         if(miaoShaUser == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
+        //查询访问次数，即指定用户访问路径的次数
+        /*String uri = request.getRequestURI();
+        String key = uri + "_" + miaoShaUser.getId();
+        Integer count = redisService.get(AccessKey.access, key, Integer.class);
+        if(count == null){
+            redisService.set(AccessKey.access, key, 1);
+        }else if(count < 5){
+            redisService.incr(AccessKey.access, key);
+        }else{
+            return Result.error(CodeMsg.ACCESS_LIMIT_REACHED);
+        }*/
 
         //验证验证码
         boolean check = miaoshaService.checkVerifyCode(miaoShaUser, goodsId, verifyCode);
@@ -161,7 +178,7 @@ public class MiaoshaController implements InitializingBean {
                                     @PathVariable("path") String path){
         model.addAttribute("user", miaoShaUser);
         if(miaoShaUser == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
 
         //验证path
@@ -205,7 +222,7 @@ public class MiaoshaController implements InitializingBean {
                                                HttpServletResponse response){
         model.addAttribute("user", miaoShaUser);
         if(miaoShaUser == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
 
         try {
@@ -234,7 +251,7 @@ public class MiaoshaController implements InitializingBean {
                        @RequestParam("goodsId") long goodsId){
         model.addAttribute("user", miaoShaUser);
         if(miaoShaUser == null){
-            return Result.error(CodeMsg.SERVER_ERROR);
+            return Result.error(CodeMsg.USER_NOT_LOGIN);
         }
         //判断商品库存
         GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);

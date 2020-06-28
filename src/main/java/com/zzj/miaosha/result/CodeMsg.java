@@ -11,6 +11,8 @@ public class CodeMsg {
     public static CodeMsg SERVER_ERROR = new CodeMsg(501, "服务端异常");
     public static CodeMsg BIND_ERROR = new CodeMsg(502, "手机号参数校验异常");
     public static CodeMsg REQUEST_ILLEGAL = new CodeMsg(503, "请求非法");
+    public static CodeMsg ACCESS_LIMIT_REACHED = new CodeMsg(504, "访问太频繁");
+    public static CodeMsg USER_NOT_LOGIN = new CodeMsg(505, "用户未登录");
 
     //登录模块
     public static CodeMsg SESSION_ERROR = new CodeMsg(511, "session不存在或已经失效");

@@ -128,6 +128,9 @@ public class MiaoshaService {
         return image;
     }
 
+    /**
+     *将字符串公式计算出结果返回，类型为Integer
+     */
     private static int calc(String exp) {
         try {
             ScriptEngineManager manager = new ScriptEngineManager();
@@ -158,7 +161,7 @@ public class MiaoshaService {
      * 验证验证码
      */
     public boolean checkVerifyCode(MiaoShaUser miaoShaUser, long goodsId, int verifyCode) {
-        if(miaoShaUser == null || goodsId <=0) {
+        if(miaoShaUser == null || goodsId <= 0) {
             return false;
         }
         Integer codeOld = redisService.get(MiaoshaKey.getMiaoshaVerifyCode,
@@ -166,6 +169,7 @@ public class MiaoshaService {
         if(codeOld == null || codeOld - verifyCode != 0){
             return false;
         }
+        //验证成功与否都需要从缓存中移除
         redisService.delete(MiaoshaKey.getMiaoshaVerifyCode,
                 miaoShaUser.getId() + "," + goodsId);
         return true;
