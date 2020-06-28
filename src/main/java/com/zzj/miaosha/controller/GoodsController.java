@@ -90,7 +90,7 @@ public class GoodsController {
         long now = System.currentTimeMillis();
         if(now < startAt){//秒杀还未开始，倒计时
             miaoshaStatus = 0;
-            remainSeconds = startAt - now;
+            remainSeconds = (startAt - now) / 1000;
         }else if(now > endAt){//秒杀结束
             miaoshaStatus = 2;
             remainSeconds = -1;

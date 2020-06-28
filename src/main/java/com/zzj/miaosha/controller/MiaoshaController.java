@@ -6,10 +6,7 @@ import com.zzj.miaosha.domain.MiaoShaUser;
 import com.zzj.miaosha.domain.OrderInfo;
 import com.zzj.miaosha.rabbitmq.MQSender;
 import com.zzj.miaosha.rabbitmq.MiaoshaMessage;
-import com.zzj.miaosha.redis.AccessKey;
-import com.zzj.miaosha.redis.GoodsKey;
-import com.zzj.miaosha.redis.MiaoshaKey;
-import com.zzj.miaosha.redis.RedisService;
+import com.zzj.miaosha.redis.*;
 import com.zzj.miaosha.result.CodeMsg;
 import com.zzj.miaosha.result.Result;
 import com.zzj.miaosha.service.GoodsService;
@@ -302,8 +299,22 @@ public class MiaoshaController implements InitializingBean {
         model.addAttribute("goods", goods);
         return "order_detail";
 
-
-
     }
+
+    //重置redis和MySQL
+    @RequestMapping(value="/reset", method=RequestMethod.GET)
+    @ResponseBody
+    public Result<Boolean> reset(Model model) {
+        List<GoodsVo> goodsList = goodsService.listGoodsVo();
+        for(GoodsVo goods : goodsList) {
+            goods.setStockCount(10);
+            redisService.set(GoodsKey.getMiaoshaGoodsStock, ""+goods.getId(), 10);
+            localOverMap.put(goods.getId(), false);
+        }
+        redisService.delete(OrderKey.getMiaoshaOrderByUidGid);
+        redisService.delete(MiaoshaKey.isGoodsOver);
+        return Result.success(true);
+    }
+
 
 }

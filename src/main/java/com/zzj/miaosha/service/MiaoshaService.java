@@ -14,6 +14,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -175,4 +176,5 @@ public class MiaoshaService {
         return true;
 
     }
+
 }
