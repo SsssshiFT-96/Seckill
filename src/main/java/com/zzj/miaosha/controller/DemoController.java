@@ -74,12 +74,12 @@ public class DemoController {
     @Autowired
     MQSender mqSender;
 
-    //测试RabbitMQ
-    @RequestMapping("/mq")
-    @ResponseBody
-    public Result<String> mq(){
-        mqSender.send("hello mq!");
-        return Result.success("hello world");
-    }
+//    //测试RabbitMQ
+//    @RequestMapping("/mq")
+//    @ResponseBody
+//    public Result<String> mq(){
+//        mqSender.send("hello mq!");
+//        return Result.success("hello world");
+//    }
 
 }

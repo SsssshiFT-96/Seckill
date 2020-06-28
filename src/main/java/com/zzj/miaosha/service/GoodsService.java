@@ -25,7 +25,7 @@ public class GoodsService {
     }
 
 
-    public void reduceStock(GoodsVo goods) {
+    public boolean reduceStock(GoodsVo goods) {
 //        String name = Thread.currentThread().getName();
 //        int q = goodsDao.aaa(goods.getId());
 //        System.out.println("前 " +name+":"+q);
@@ -33,7 +33,8 @@ public class GoodsService {
 
         MiaoShaGoods g = new MiaoShaGoods();
         g.setGoodsId(goods.getId());
-        goodsDao.reduceStock(g);
+        int ret = goodsDao.reduceStock(g);
+        return ret > 0;
 
 
 //        int i = goodsDao.aaa(goods.getId());

@@ -44,13 +44,13 @@ public class OrderService {
         orderInfo.setOrderChannel(1);
         orderInfo.setStatus(0);
         orderInfo.setUserId(miaoShaUser.getId());
-        long orderId = orderDao.insert(orderInfo);
+        orderDao.insert(orderInfo);//这里修改一下
 
         //下秒杀订单
         MiaoShaOrder miaoShaOrder = new MiaoShaOrder();
         miaoShaOrder.setGoodsId(goods.getId());
         miaoShaOrder.setUserId(miaoShaUser.getId());
-        miaoShaOrder.setOrderId(orderId);
+        miaoShaOrder.setOrderId(orderInfo.getId());//订单id应该是从订单信息里获取
         orderDao.insertMiaoshaOrder(miaoShaOrder);
         //将秒杀订单写入缓存
         redisService.set(OrderKey.getMiaoshaOrderByUidGid,

@@ -16,6 +16,8 @@ public class MQConfig {
     public static final String TOPIC_EXCHANGE = "topic.exchange";
     public static final String ROUTING_KEY1 = "topic.key1";
     public static final String ROUTING_KEY2 = "topic.#";
+    public static final String MIAOSHA_QUEUE = "miaosha.queue";
+
 
     /**
      *
@@ -24,7 +26,7 @@ public class MQConfig {
     @Bean
     public Queue queue(){
 
-        return new Queue(QUEUE, true);
+        return new Queue(MIAOSHA_QUEUE, true);
     }
 
     /**

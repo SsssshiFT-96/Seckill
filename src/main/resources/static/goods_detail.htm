@@ -68,6 +68,42 @@
 </body>
 <script>
 
+function getMiaoshaResult(goodsId){
+    g_showLoading();
+    $.ajax({
+        url:"/miaosha/result",
+        type:"GET",
+        data:{
+            goodsId:$("#goodsId").val(),
+        },
+        success:function(data){
+            if(data.code == 0){
+                var result = data.data;
+                if(result < 0){
+                    layer.msg("对不起，秒杀失败");
+                }else if(result == 0){//继续轮询
+                    setTimeout(function(){
+                        getMiaoshaResult(goodsId);
+                    }, 50);//50毫秒后轮询
+                }else{
+                    layer.confirm("恭喜你，秒杀成功！查看订单？", {btn:["确定","取消"]},
+                        function(){//查看订单
+                            window.location.href="/order_detail.htm?orderId="+result;
+                        },
+                        function(){
+                            layer.closeAll();
+                        });
+                }
+            }else{
+                layer.msg(data.msg);
+            }
+        },
+        error:function(){
+            layer.msg("客户端请求有误");
+        }
+    });
+}
+
 function doMiaosha(){
 	$.ajax({
 		url:"/miaosha/do_miaosha",
@@ -77,7 +113,9 @@ function doMiaosha(){
 		},
 		success:function(data){
 			if(data.code == 0){
-				window.location.href="/order_detail.htm?orderId="+data.data.id;
+				// window.location.href="/order_detail.htm?orderId="+data.data.id;
+                //客户端轮询服务端
+                getMiaoshaResult($("#goodsId").val());
 			}else{
 				layer.msg(data.msg);
 			}
@@ -179,6 +217,11 @@ function countDown(){
 		$("#buyButton").attr("disabled", true);
 		$("#miaoshaTip").html("秒杀已经结束");
 	}
+}
+//展示loading
+function g_showLoading(){
+    var idx = layer.msg('处理中...', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: '0px', time:100000}) ;
+    return idx;
 }
 
 </script>
